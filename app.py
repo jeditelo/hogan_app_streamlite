@@ -18,6 +18,8 @@ def read_file(path_to_file):
 
 def get_canvas(viewer):
     page_1_canvas = viewer.canvas.text_content
+    if not os.path.exists(r'.\tmp'):
+            os.makedirs(r'.\tmp')
 
     with open(r".\tmp\page_1_canvas.txt", "w", encoding='utf8') as f:
         f.write(page_1_canvas)
@@ -123,38 +125,37 @@ def write_file(excel_path, frame):
 
 
 def main():
-	st.title("Hogan test. PDF to Excel")
-
-	st.subheader("PDF files")
-	uploaded_files = st.file_uploader("Choose a PDF files", type=['pdf'], accept_multiple_files=True, key=None)
-	if st.button("Process"):
-		# try:
-			path = r".\results"
-			excel_name = 'result.xlsx'
-			excel_path = os.path.join(path, excel_name)
-			with pd.ExcelWriter(excel_path ,mode='w') as writer:
-				pd.DataFrame().to_excel(writer, sheet_name='Sheet_name_1')
-			#path_to_file = r".\examples\test.pdf"
-			#folder = r".\examples"
-			#files = [x for x in os.listdir(folder) if x.endswith(".pdf")]
-			for file in uploaded_files:
-				#path_to_file = os.path.join(folder, file)
-				path_to_file = file.name
-				st.write(file)
-				viewer = read_file(file)
-				get_canvas(viewer)
-				df_page1 = first_page()
-				df_page2 = second_page()
-				fin_df = concat_frame(df_page1, df_page2, path_to_file)
-				write_file(excel_path, fin_df)
-			with open(excel_path, 'rb') as f:
-				data = f.read()
-				bin_str = base64.b64encode(data).decode()
-				href = f'<a href="data:application/octet-stream;base64,{bin_str}"  download="{os.path.basename(excel_path)}">Download Result Excel</a>'
-				st.markdown(href, unsafe_allow_html=True)
-				
-		# except:
-		# 	st.write("plak-plak")
+    st.title("Hogan test. PDF to Excel")
+    st.subheader("PDF files")
+    uploaded_files = st.file_uploader("Choose a PDF files", type=['pdf'], accept_multiple_files=True, key=None)
+	
+    if st.button("Process"):
+        
+        if not os.path.exists(r'.\results'):
+            os.makedirs(r'.\results')
+        path = r".\results"
+        excel_name = 'result.xlsx'
+        excel_path = os.path.join(path, excel_name)
+        with pd.ExcelWriter(excel_path ,mode='w') as writer:
+            pd.DataFrame().to_excel(writer, sheet_name='Sheet_name_1')
+        #path_to_file = r".\examples\test.pdf"
+        #folder = r".\examples"
+        #files = [x for x in os.listdir(folder) if x.endswith(".pdf")]
+        for file in uploaded_files:
+            #path_to_file = os.path.join(folder, file)
+            path_to_file = file.name
+            st.write(file)
+            viewer = read_file(file)
+            get_canvas(viewer)
+            df_page1 = first_page()
+            df_page2 = second_page()
+            fin_df = concat_frame(df_page1, df_page2, path_to_file)
+            write_file(excel_path, fin_df)
+        with open(excel_path, 'rb') as f:
+            data = f.read()
+            bin_str = base64.b64encode(data).decode()
+            href = f'<a href="data:application/octet-stream;base64,{bin_str}"  download="{os.path.basename(excel_path)}">Download Result Excel</a>'
+            st.markdown(href, unsafe_allow_html=True)
 
 if __name__ == '__main__':
 	main()
