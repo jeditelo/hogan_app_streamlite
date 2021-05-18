@@ -1,8 +1,7 @@
-import streamlit as st
 import os
 import re
 import warnings
-import argparse
+import streamlit as st
 import pandas as pd
 import numpy as np
 from pdfreader import SimplePDFViewer
