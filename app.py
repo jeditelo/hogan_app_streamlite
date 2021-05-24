@@ -51,15 +51,28 @@ def first_page():
     df_name_.count_ = df_count.col2
     df_name_.drop(columns=['col1'], inplace=True)
     df_name_.rename(columns={
-        'col2':'parameter_page1',
-        'count_':'score_page1'
+        'col2':'col2',
+        'count_':'count'
     }, inplace=True)
     df_name_.reset_index(drop=True, inplace=True)
+    df_name_[:1].col2 = 'HPI'
+    df_name_[8:9].col2 = 'HDS'
+    df_name_[20:21].col2 = 'MVPI'
+    df_name_['cat']=np.nan
+    df_name_['cat'] = df_name_.loc[df_name_['count'].isnull()==True, 'col2']
+    df_name_.cat.fillna(method='pad', inplace=True)
+    df_name_ = df_name_.loc[df_name_['count'].isnull()==False]
+    df_name_['sub_cat'] = np.nan
 
     return df_name_
 
 
 def second_page():
+    mapping = {'0':'0',
+         '1':'39',
+         '2':'69',
+         '3':'89',
+         '4':'100',}
     grey = '0.901 0.905 0.909 rg'
     df = pd.read_csv(r".\tmp\page_2_canvas.txt", header = [1])
     df.rename(columns={' q':'col1'}, inplace=True)
@@ -96,24 +109,38 @@ def second_page():
     df_name = df_name[:157]
     df_name.reset_index(drop=True, inplace=True)
     df_name['count'][df_name.col2=='Баллы_по_субшкалам'] = np.nan
-    res = pd.concat([df_name[:51].reset_index(), df_name[51:96].reset_index(), df_name[96:].reset_index()], axis=1)
-    res.drop(columns=['index'],inplace=True)
-    res.columns = pd.Index(['parameter1_page2', 'score1_page2', 'parameter2_page2', 'score2_page2', 'parameter3_page2', 'score3_page2'], 
-                            dtype='object')
-    return res
+    df_name['sub_cat'] = np.nan
+    df_name['sub_cat'] = df_name.loc[df_name['count']==' ']
+    df_name[:1].col2 = 'HPI'
+    df_name[51:52].col2 = 'HDS'
+    df_name[96:97].col2 = 'MVPI'
+    df_name['cat']=np.nan
+    df_name['cat'] = df_name.loc[df_name['count'].isnull()==True, 'col2']
+    df_name.sub_cat.fillna(method='pad', inplace=True)
+    df_name.cat.fillna(method='pad', inplace=True)
+    df_name = df_name.loc[df_name['count']!=' ']
+    df_name = df_name.loc[df_name['count'].isnull()==False]
+    df_name['count'] = df_name['count'].astype('int')
+    df_name.loc[df_name.cat=='HDS', 'count']  = df_name.loc[df_name.cat=='HDS', 'count'].astype('str').apply(lambda val: mapping[val])
+    df_name.loc[df_name.cat=='MVPI', 'count'] *= 25
+    df_name.loc[df_name.cat=='HPI', 'count']*= 25
+    return df_name
 
 def concat_frame(page1, page2, name):
-    df_ = pd.DataFrame({'parameter_page1':[np.nan, name, 'parameter_page1'],
-              'score_page1':[np.nan, np.nan, 'score_page1'],
-              'parameter1_page2':[np.nan, np.nan, 'HPI'], 
-              'score1_page2':[np.nan, np.nan, 'HPI_score'],
-              'parameter2_page2':[np.nan, np.nan, 'HDS'],
-              'score2_page2':[np.nan, np.nan, 'HDS_score'],
-              'parameter3_page2':[np.nan, np.nan, 'MVPI'],
-              'score3_page2':[np.nan, np.nan, 'MVPI_score']})
-    df = pd.concat([page1, page2], axis=1)
-    df = pd.concat([df_, df], ignore_index=True)
+    df = pd.concat([page1, page2])
+    df['name']  = name
+    df = df[['name', 'cat', 'sub_cat', 'col2', 'count']]
+    df.rename(columns={
+        'name':'Name',
+        'cat':'lvl 1',
+        'sub_cat':'lvl 2',
+        'col2':'lvl 3',
+        'count':'Score '
+    },  inplace=True)
     df.reset_index(drop=True, inplace=True)
+    df[42:43]['lvl 2'] = 'Амбициозность'
+    df[42:43]['lvl 3'] = 'Отсутствие_социальной_тревожности'
+    df[28:29]['lvl 1'] = ''
     return df
 
 def write_file(excel_path, frame):
