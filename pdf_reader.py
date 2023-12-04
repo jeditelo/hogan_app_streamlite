@@ -131,7 +131,7 @@ if __name__== '__main__':
     excel_path = os.path.join(path, excel_name)
     with pd.ExcelWriter(excel_path ,mode='w') as writer:
         pd.DataFrame().to_excel(writer, sheet_name='Sheet_name_1')
-    path_to_file = r".\examples\test.pdf"
+    path_to_file = r".\examples\old.pdf"
     #folder = r".\examples"
     folder = r".\uploads"
     files = [x for x in os.listdir(folder) if x.endswith(".pdf")]
