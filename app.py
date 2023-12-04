@@ -1,6 +1,7 @@
 import os
 import re
 import warnings
+import fitz  
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -149,6 +150,48 @@ def write_file(excel_path, frame):
     result = pd.concat([frame, df_excel],axis=0, ignore_index=True)
     result.to_excel(excel_path, index=False)
 
+def old_file_version_proc(excel_path, file, file_name):
+
+    pdf_document = fitz.open(file)
+    data = ''
+    page = pdf_document.load_page(0)
+
+    data += page.get_text()
+
+    pdf_document.close()
+
+    start_index = data.index('Hogan Personality Inventory')
+    end_index = data.index('© 2017 HOGAN ASSESSMENT SYSTEMS, INC.')
+    trimmed_data = data[start_index:end_index]
+
+    split_data = trimmed_data.split('\n')
+
+    split_data = [line for line in split_data if line]
+
+    categories = []
+    indicators = []
+    scores = []
+
+    current_category = ''
+    for line in split_data:
+        if line in ['Hogan Personality Inventory', 'Hogan Development Survey', 'Motives, Values, Preferences Inventory']:
+            current_category = line
+        else:
+            if line.isdigit() or line.startswith(' '):
+                scores.append(line.strip())
+            else:
+                indicators.append(line)
+                categories.append(current_category)
+
+    df = pd.DataFrame({
+        'Name':file_name,
+        'Category': categories,
+        'Indicator': indicators,
+        'Score': scores
+    })
+    df.to_excel(excel_path, index=False)
+    
+
 
 
 def main():
@@ -169,15 +212,19 @@ def main():
             #folder = r".\examples"
             #files = [x for x in os.listdir(folder) if x.endswith(".pdf")]
             for file in uploaded_files:
+                
                 #path_to_file = os.path.join(folder, file)
                 path_to_file = file.name
                 st.write(file)
-                viewer = read_file(file)
-                get_canvas(viewer)
-                df_page1 = first_page()
-                df_page2 = second_page()
-                fin_df = concat_frame(df_page1, df_page2, path_to_file)
-                write_file(excel_path, fin_df)
+                try:
+                    viewer = read_file(file)
+                    get_canvas(viewer)
+                    df_page1 = first_page()
+                    df_page2 = second_page()
+                    fin_df = concat_frame(df_page1, df_page2, path_to_file)
+                    write_file(excel_path, fin_df)
+                except:
+                    old_file_version_proc(excel_path, file, path_to_file)
             st.success('Done!')
             with open(excel_path, 'rb') as f:
                 data = f.read()
