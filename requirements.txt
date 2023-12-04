@@ -4,4 +4,4 @@ pandas==1.1.5
 pdfreader==0.1.10
 streamlit==0.82.0
 Werkzeug==2.0.0
-PyMuPDF
+PyMuPDF==1.19.5
