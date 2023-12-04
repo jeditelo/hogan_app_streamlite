@@ -216,14 +216,15 @@ def main():
                 #path_to_file = os.path.join(folder, file)
                 path_to_file = file.name
                 st.write(file)
-                try:
+		st.write(file.size)
+		if file.size>100609
                     viewer = read_file(file)
                     get_canvas(viewer)
                     df_page1 = first_page()
                     df_page2 = second_page()
                     fin_df = concat_frame(df_page1, df_page2, path_to_file)
                     write_file(excel_path, fin_df)
-                except:
+                else:
                     old_file_version_proc(excel_path, file, path_to_file)
             st.success('Done!')
             with open(excel_path, 'rb') as f:
