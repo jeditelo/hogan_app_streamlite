@@ -152,7 +152,7 @@ def write_file(excel_path, frame):
 
 def old_file_version_proc(excel_path, file, file_name):
 
-    pdf_document = fitz.open(file.read())
+    pdf_document = fitz.open(stream=file.read(), filetype="pdf")
     data = ''
     page = pdf_document.load_page(0)
 
