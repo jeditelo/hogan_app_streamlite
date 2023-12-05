@@ -189,7 +189,7 @@ def old_file_version_proc(excel_path, file, file_name):
         'Indicator': indicators,
         'Score': scores
     })
-	write_file(excel_path, df)
+    write_file(excel_path, df)
     #df.to_excel(excel_path, index=False)
     
 
