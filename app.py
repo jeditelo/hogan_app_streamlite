@@ -216,8 +216,8 @@ def main():
                 #path_to_file = os.path.join(folder, file)
                 path_to_file = file.name
                 st.write(file)
-		st.write(file.size)
-		if file.size>100000
+                st.write(file.size)
+                if file.size>100000
                     viewer = read_file(file)
                     get_canvas(viewer)
                     df_page1 = first_page()
